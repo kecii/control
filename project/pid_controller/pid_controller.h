@@ -10,6 +10,29 @@
 class PID {
 public:
 
+    double Error_p;
+    double Error_i;
+    double Error_d;
+
+    /*
+    * Coefficients
+    */
+    double Kp;
+    double Ki;
+    double Kd;
+
+    /*
+    * Output limits
+    */
+    double outputMax;
+    double outputMin;
+  
+    /*
+    * Delta time
+    */
+    double deltaTime;
+  
+  
    /**
    * TODO: Create the PID class
    **/
@@ -17,19 +40,31 @@ public:
     /*
     * Errors
     */
-
+   double _p_err;
+   double _i_err;
+   double _d_err;
+  
+     
+  
     /*
     * Coefficients
     */
-
+   double _kp;
+   double _ki;
+   double _kd;
+   
+  
     /*
     * Output limits
     */
+   double _output_lim_max;
+   double _output_lim_min;  
+  
   
     /*
     * Delta time
     */
-
+   double _delta_time;
     /*
     * Constructor
     */
