@@ -225,9 +225,22 @@ int main ()
   PID pid_steer = PID();
   PID pid_throttle = PID();
 
-  pid_steer.Init(0.4, 0.001, 0.35, 1.2, -1.2);
-  pid_throttle.Init(0.2, 0.0015, 0.04, 1.0, -1.0); 
+ // pid_steer.Init(0.2, 0.01, 0.04, 1.2, -1.2);
+ 
+ // pid_steer.Init(0.4, 0.01, 0.08, 1.2, -1.2);
+ 
+  //pid_steer.Init(0.4, 0.02, 0.1, 1.2, -1.2);
+   pid_steer.Init(0.4, 0.002, 0.5, 1.2, -1.2);//step 3 end
   
+  
+ // pid_throttle.Init( 0.4, 5, 0.0098, 1.0, -1.0);
+ // pid_throttle.Init(0.4, 0.05, 0.01, 1.0, -1.0); 
+ // pid_throttle.Init(0.3, 0.01, 0.05, 1.0, -1.0);
+  //pid_throttle.Init(0.2, 0.005, 0.05, 1.0, -1.0);
+  //pid_throttle.Init(0.2, 0.05, 0.05, 1.0, -1.0);
+  pid_throttle.Init(0.2, 0.001, 0.01, 1.0, -1.0);//step 3 end
+ // pid_throttle.Init(0.3, 1, 0.02, 1.0, -1.0);//tests
+ 
   h.onMessage([&pid_steer, &pid_throttle, &new_delta_time, &timer, &prev_timer, &i, &prev_timer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
         auto s = hasData(data);
@@ -289,7 +302,7 @@ int main ()
           * TODO (step 3): uncomment these lines
           **/
 //           // Update the delta time with the previous command
-           //pid_steer.UpdateDeltaTime(new_delta_time);
+          pid_steer.UpdateDeltaTime(new_delta_time);
 
           // Compute steer error
           double error_steer;
@@ -305,30 +318,30 @@ int main ()
 				The output of the controller should be inside [-1.2, 1.2].
 				If needed, the position of the car is stored in the variables x_position, y_position and z_position
           **/
-          error_steer = 0;
+ //          error_steer = 0;
 
-          if( x_points.size() > 1 )
-          {
-    		double _ego_yaw = angle_between_points(x_points[x_points.size()-2], y_points[y_points.size()-2], 								x_points[x_points.size()-1], y_points[y_points.size()-1]);
+           if( x_points.size() > 1 )
+           {
+    		double _ego_yaw = angle_between_points(x_points[x_points.size()-2], y_points[y_points.size()-2], x_points[x_points.size()-1], y_points[y_points.size()-1]);
            // The error is the angle difference between the actual steer and the desired steer to reach the planned position, _ego_yaw is calculate in the same way as ego_state.rotation.yaw
-            error_steer = _ego_yaw - yaw;
-			}                   
-          
+             error_steer = _ego_yaw - yaw;
+ 			}                   
+          cout << "Error  Steer " <<error_steer << endl;
           /**
           * TODO (step 3): uncomment these lines
           **/
 //           // Compute control to apply
-//           pid_steer.UpdateError(error_steer);
-//           steer_output = pid_steer.TotalError();
+           pid_steer.UpdateError(error_steer);
+           steer_output = pid_steer.TotalError();
 
 //           // Save data
-//           file_steer.seekg(std::ios::beg);
-//           for(int j=0; j < i - 1; ++j) {
-//               file_steer.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-//           }
-//           file_steer  << i ;
-//           file_steer  << " " << error_steer;
-//           file_steer  << " " << steer_output << endl;
+           file_steer.seekg(std::ios::beg);
+           for(int j=0; j < i - 1; ++j) {
+               file_steer.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+           }
+           file_steer  << i ;
+           file_steer  << " " << error_steer;
+           file_steer  << " " << steer_output << endl;
 
           ////////////////////////////////////////
           // Throttle control
@@ -353,13 +366,14 @@ int main ()
            **/
           
           error_throttle = 0;
-          if( x_points.size() > 1 )
+          
+          if(v_points.size()>0)
           {
    
             error_throttle = v_points[v_points.size()-1] - velocity; 
    
           } // The error is the speed difference between the actual speed (The last point of v_points) and the desired speed.
-
+		  cout << "Error throttle " << error_throttle << endl;
           double throttle_output;
           double brake_output;
 
@@ -384,10 +398,11 @@ int main ()
            for(int j=0; j < i - 1; ++j){
                file_throttle.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
            }
+
            file_throttle  << i ;
            file_throttle  << " " << error_throttle;
-           file_throttle  << " " << bra            file_throttle  << " " << throttle_output << endl;
-
+           file_throttle  << " " << brake_output;
+           file_throttle  << " " << throttle_output << endl;
 
           // Send control
           json msgJson;

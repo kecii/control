@@ -36,7 +36,7 @@ void PID::UpdateError(double cte) {
    * TODO: Update PID errors based on cte.
    **/
  
-  if (_delta_time >  1e-6)  //avoid increase too much the error in small delta time
+  if (_delta_time >  1e-7)  //avoid increase too much the error in small delta time
   {  
     _d_err = (cte - _p_err) / _delta_time;
   }
